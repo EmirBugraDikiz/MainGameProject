@@ -1259,10 +1259,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelEndTrigger
   gasEffect: {fileID: 1875724298}
-  gasDelay: 1
   deathEffect: {fileID: 1292683831}
   fadeOutDuration: 1.5
   sleepAudioSource: {fileID: 365930342}
+  yawnAndFadeDelay: 1
   nextSceneName: Room3_Whatever
 --- !u!1 &94465551
 GameObject:
@@ -2537,6 +2537,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PotionPickup
   potionType: 0
   destroyDelay: 0.1
+  pickupClip: {fileID: 8300000, guid: 45e929e3af3b91b43849a98ffb692aa5, type: 3}
+  pickupVolume: 0.8
+  pitchRange: {x: 0.95, y: 1.05}
 --- !u!4 &221407987 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4008155813552842, guid: e53cd9b7f6ac44f3ebe9af3f0f302b4f, type: 3}
@@ -5343,7 +5346,7 @@ Transform:
   m_GameObject: {fileID: 357227631}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 102.12, y: 2.65, z: 14.87}
+  m_LocalPosition: {x: 102.12, y: 2.65, z: 12.88}
   m_LocalScale: {x: 20, y: 1, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17463,6 +17466,7 @@ MonoBehaviour:
   groundAcceleration: 25
   airAccelerationNormal: 3
   airAccelerationKronos: 18
+  ceilingHitDownVelocity: -2
   hasDoubleJump: 0
   maxJumpsWithAbility: 2
   doubleJumpVisual: {fileID: 1272359712}
@@ -17470,6 +17474,17 @@ MonoBehaviour:
   kronosKey: 113
   slowMotionScale: 0.3
   playerAnimator: {fileID: 0}
+  playerAudioSource: {fileID: 0}
+  footstepClip: {fileID: 8300000, guid: 33bc1c5dcd0584d42bac336dc6262b06, type: 3}
+  firstJumpClip: {fileID: 8300000, guid: f0129b2f656a44f48a5d005c2418aab6, type: 3}
+  doubleJumpClip: {fileID: 8300000, guid: ad3f23a25aed1364ab65f5da2128a19e, type: 3}
+  footstepVolume: 0.65
+  jumpVolume: 0.8
+  walkStepInterval: 0.48
+  sprintStepInterval: 0.3
+  footstepPitchRange: {x: 0.95, y: 1.05}
+  jumpPitchRange: {x: 0.98, y: 1.02}
+  minSpeedForFootsteps: 0.15
   controlsEnabled: 1
 --- !u!114 &1292683827
 MonoBehaviour:
@@ -24615,9 +24630,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RampFakeMove
   ramp: {fileID: 1345017080}
+  sfxSource: {fileID: 0}
+  slideClip: {fileID: 8300000, guid: 5ed80553ee3a83c4daafa937c599352d, type: 3}
+  baseVolume: 0.7
+  pitchRange: {x: 0.92, y: 1.08}
+  pitchBoostBySpeed: 0.015
+  fadeOutTime: 0.2
   targetWorldZ: -1.6
   moveSpeed: 20
   moveOnlyOnce: 1
+  drawGizmos: 1
 --- !u!65 &1771374934
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -26864,7 +26886,7 @@ ParticleSystem:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  moveWithTransform: 0
+  moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
   randomSeed: 0
@@ -27045,7 +27067,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 1
+      scalar: 2.5
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -27369,7 +27391,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0
+      scalar: -0.05
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -28058,7 +28080,7 @@ ParticleSystem:
         m_RotationOrder: 4
     separateAxes: 0
   ColorModule:
-    enabled: 0
+    enabled: 1
     gradient:
       serializedVersion: 2
       minMaxState: 1
@@ -28066,8 +28088,8 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 1}
-        key1: {r: 1, g: 1, b: 1, a: 1}
+        key0: {r: 0.42745098, g: 1, b: 0.5411765, a: 0.3647059}
+        key1: {r: 0.6039216, g: 0.41960785, b: 1, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}
@@ -28075,7 +28097,7 @@ ParticleSystem:
         key6: {r: 0, g: 0, b: 0, a: 0}
         key7: {r: 0, g: 0, b: 0, a: 0}
         ctime0: 0
-        ctime1: 65535
+        ctime1: 37586
         ctime2: 0
         ctime3: 0
         ctime4: 0
@@ -28091,7 +28113,7 @@ ParticleSystem:
         atime6: 0
         atime7: 0
         m_Mode: 0
-        m_ColorSpace: -1
+        m_ColorSpace: 0
         m_NumColorKeys: 2
         m_NumAlphaKeys: 2
       minGradient:
@@ -28249,7 +28271,7 @@ ParticleSystem:
     flipU: 0
     flipV: 0
   VelocityModule:
-    enabled: 0
+    enabled: 1
     x:
       serializedVersion: 2
       minMaxState: 0
@@ -29443,7 +29465,7 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
   NoiseModule:
-    enabled: 0
+    enabled: 1
     strength:
       serializedVersion: 2
       minMaxState: 0
@@ -29604,16 +29626,16 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     separateAxes: 0
-    frequency: 0.5
+    frequency: 0.3
     damping: 1
     octaves: 1
     octaveMultiplier: 0.5
     octaveScale: 2
-    quality: 1
+    quality: 2
     scrollSpeed:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0
+      scalar: 0.5
       minScalar: 0
       maxCurve:
         serializedVersion: 2
