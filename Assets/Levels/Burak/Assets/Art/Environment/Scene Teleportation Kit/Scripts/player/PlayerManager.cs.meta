@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 289f4e73ab8128d45834bdbeb4b2ac0e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 202903
+  packageName: Scene Teleportation
+  packageVersion: 1.0
+  assetPath: Assets/Scene Teleportation Kit/Scripts/player/PlayerManager.cs
+  uploadId: 462286

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 83042a092373d86429563194a6ea4856
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 202903
+  packageName: Scene Teleportation
+  packageVersion: 1.0
+  assetPath: Assets/Scene Teleportation Kit/Prefabs/vfx/portal_vfx_orange.prefab
+  uploadId: 462286

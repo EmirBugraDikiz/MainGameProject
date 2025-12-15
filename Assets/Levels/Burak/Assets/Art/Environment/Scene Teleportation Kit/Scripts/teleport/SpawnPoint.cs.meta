@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 334200d2109c78c43bea7e2b73872bb1
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 202903
+  packageName: Scene Teleportation
+  packageVersion: 1.0
+  assetPath: Assets/Scene Teleportation Kit/Scripts/teleport/SpawnPoint.cs
+  uploadId: 462286

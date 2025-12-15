@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 1df6986c70fc95148821d53832beae9f
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 202903
+  packageName: Scene Teleportation
+  packageVersion: 1.0
+  assetPath: Assets/Scene Teleportation Kit/Prefabs/portal/TeleporterTrigger.prefab
+  uploadId: 462286

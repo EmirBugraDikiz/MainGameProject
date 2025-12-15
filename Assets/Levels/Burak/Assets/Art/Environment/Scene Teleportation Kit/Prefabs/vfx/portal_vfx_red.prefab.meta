@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: d86c590c2cb57aa4aaab73103a281989
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 202903
+  packageName: Scene Teleportation
+  packageVersion: 1.0
+  assetPath: Assets/Scene Teleportation Kit/Prefabs/vfx/portal_vfx_red.prefab
+  uploadId: 462286

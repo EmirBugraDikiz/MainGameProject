@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 6d3f2785a9108ce458f4f4f702b06a73
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 202903
+  packageName: Scene Teleportation
+  packageVersion: 1.0
+  assetPath: Assets/Scene Teleportation Kit/Prefabs/portal/SpawnLocation.prefab
+  uploadId: 462286
