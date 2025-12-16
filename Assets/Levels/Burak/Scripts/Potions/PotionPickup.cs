@@ -8,6 +8,10 @@ public enum PotionType
 
 public class PotionPickup : MonoBehaviour
 {
+    // ==== Global State (Narrator / kapı / kontrol mekanikleri için) ====
+    public static bool DoubleJumpCollected = false;
+    public static bool KronosCollected = false;
+
     [Header("Settings")]
     public PotionType potionType;
     public float destroyDelay = 0.1f;
@@ -17,12 +21,21 @@ public class PotionPickup : MonoBehaviour
     [Range(0f, 1f)] public float pickupVolume = 0.8f;
     public Vector2 pitchRange = new Vector2(0.95f, 1.05f);
 
+    [Header("Narrator (Optional)")]
+    [Tooltip("Boş bırakırsan sahneden otomatik bulmayı dener.")]
+    public NarratorAudioManager narrator;
+
+    [Tooltip("Potion alınca çalınacak narrator repliği (L2_05_PotionPickUp_CLEAN)")]
+    public AudioClip narratorLineOnPickup;
+
+    [Tooltip("Potion SFX’ten sonra narrator kaç saniye sonra girsin?")]
+    public float narratorDelay = 0.15f;
+
     private bool isCollected = false;
 
     private void OnTriggerEnter(Collider other)
     {
         if (isCollected) return;
-
         if (!other.CompareTag("Player")) return;
 
         PlayerAbilitiesController abilities = other.GetComponent<PlayerAbilitiesController>();
@@ -30,20 +43,25 @@ public class PotionPickup : MonoBehaviour
 
         isCollected = true;
 
-        // Yeteneği ver
+        // Yeteneği ver + state’i işaretle
         switch (potionType)
         {
             case PotionType.DoubleJump:
                 abilities.GrantDoubleJump();
+                DoubleJumpCollected = true;
                 break;
 
             case PotionType.Kronos:
                 abilities.GrantKronos();
+                KronosCollected = true;
                 break;
         }
 
-        // Sesi potion yok olsa bile tam çal
+        // 1) Potion pickup SFX (potion yok olsa bile tam çalar)
         PlayPickupSoundFull();
+
+        // 2) Narrator repliği
+        PlayNarratorLine();
 
         // Görsel + collider kapat (spam olmasın, estetik)
         DisableVisuals();
@@ -55,8 +73,6 @@ public class PotionPickup : MonoBehaviour
     {
         if (pickupClip == null) return;
 
-        // PlayClipAtPoint yeni bir GameObject + AudioSource oluşturur, clip bitince kendi yok olur
-        // Pitch random için küçük trick: geçici objeyi kendimiz yaratıp pitch set etmek
         GameObject temp = new GameObject("PotionPickupSFX");
         temp.transform.position = transform.position;
 
@@ -70,6 +86,31 @@ public class PotionPickup : MonoBehaviour
 
         a.Play();
         Destroy(temp, pickupClip.length / Mathf.Max(0.01f, a.pitch));
+    }
+
+    private void PlayNarratorLine()
+    {
+        if (narratorLineOnPickup == null) return;
+
+        if (narrator == null)
+            narrator = FindFirstObjectByType<NarratorAudioManager>();
+
+        if (narrator == null) return;
+
+        if (narratorDelay <= 0f)
+        {
+            narrator.Enqueue(narratorLineOnPickup, true);
+        }
+        else
+        {
+            Invoke(nameof(PlayNarratorDelayed), narratorDelay);
+        }
+    }
+
+    private void PlayNarratorDelayed()
+    {
+        if (narrator != null && narratorLineOnPickup != null)
+            narrator.Enqueue(narratorLineOnPickup, true);
     }
 
     private void DisableVisuals()
