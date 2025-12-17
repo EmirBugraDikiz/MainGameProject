@@ -1,27 +1,32 @@
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))] // Bu satýr, objede AudioSource yoksa otomatik ekler
 public class kapi : MonoBehaviour
 {
     [Header("Ayarlar")]
-    public float acilmaMiktari = 90f; // Kapýnýn ne kadar döneceði (Örn: 90 derece)
-    public float acilmaHizi = 5f;     // Dönüþ hýzý
+    public float acilmaMiktari = 90f;
+    public float acilmaHizi = 5f;
+
+    [Header("Sesler")]
+    public AudioClip acilmaSesi;   // Buraya "15419__pagancow..." dosyasýný sürükle
+    public AudioClip kapanmaSesi;  // Buraya "652346__weak_hero..." dosyasýný sürükle
 
     private bool acikMi = false;
-    private Quaternion baslangicRotasyonu; // Kapýnýn ilk (kapalý) hali
-    private Quaternion hedefRotasyon;      // Gitmesi gereken açý
+    private Quaternion baslangicRotasyonu;
+    private Quaternion hedefRotasyon;
+    private AudioSource audioSource; // Audio Source referansý
 
     void Start()
     {
-        // 1. Oyun baþladýðýnda kapý editörde nasýl duruyorsa, o açýyý "Kapalý" hali olarak kaydet.
         baslangicRotasyonu = transform.localRotation;
-        
-        // Baþlangýçta hedefimiz kapalý kalmak.
         hedefRotasyon = baslangicRotasyonu;
+
+        // Scriptin takýlý olduðu objedeki Audio Source'u bulup deðiþkene atýyoruz
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
     {
-        // Kapýyý yumuþakça hedefe döndür
         transform.localRotation = Quaternion.Slerp(transform.localRotation, hedefRotasyon, Time.deltaTime * acilmaHizi);
     }
 
@@ -31,15 +36,26 @@ public class kapi : MonoBehaviour
 
         if (acikMi)
         {
-            // 2. AÇIK HALÝ: Baþlangýç rotasyonunun üzerine "acilmaMiktari" kadar ekleme yap.
-            // Quaternion'larda ekleme iþlemi çarpma (*) ile yapýlýr.
+            // --- AÇILMA ---
             Quaternion acilmaRotasyonu = Quaternion.Euler(0, acilmaMiktari, 0);
             hedefRotasyon = baslangicRotasyonu * acilmaRotasyonu;
+
+            // Açýlma sesi çal (Ses dosyasý atanmýþsa)
+            if (audioSource != null && acilmaSesi != null)
+            {
+                audioSource.PlayOneShot(acilmaSesi);
+            }
         }
         else
         {
-            // 3. KAPALI HALÝ: Direkt olarak baþlangýçta kaydettiðimiz orijinal duruma dön.
+            // --- KAPANMA ---
             hedefRotasyon = baslangicRotasyonu;
+
+            // Kapanma sesi çal (Ses dosyasý atanmýþsa)
+            if (audioSource != null && kapanmaSesi != null)
+            {
+                audioSource.PlayOneShot(kapanmaSesi);
+            }
         }
     }
 }
