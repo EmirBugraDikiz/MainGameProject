@@ -23,7 +23,7 @@ public class LevelEndTrigger : MonoBehaviour
 
     [Header("Next Level")]
     [Tooltip("Geçilecek sahnenin adı (Build Settings'te ekli olmalı).")]
-    public string nextSceneName = "Room3";
+    public string nextSceneName = "Map_HospSON";
 
     private bool triggered = false;
 

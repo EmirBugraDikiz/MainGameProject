@@ -1334,7 +1334,7 @@ MonoBehaviour:
   fadeOutDuration: 1.5
   sleepAudioSource: {fileID: 365930342}
   yawnAndFadeDelay: 1
-  nextSceneName: Room3_Whatever
+  nextSceneName: Map_HospSON
 --- !u!1 &94465551
 GameObject:
   m_ObjectHideFlags: 0
