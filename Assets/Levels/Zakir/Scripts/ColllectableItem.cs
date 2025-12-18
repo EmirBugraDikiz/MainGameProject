@@ -3,18 +3,28 @@ using UnityEngine;
 public class CollectableItem : MonoBehaviour
 {
     [Header("Eþya Tipi")]
-    // ItemCollector'daki enum'ý kullanýyoruz
     public ItemCollector.ItemType itemType;
 
     [Header("Toplama Yöntemi")]
     [Tooltip("True ise yaklaþtýðýnda otomatik toplanýr. False ise E tuþuna basýlmasý gerekir.")]
     public bool collectOnTrigger = true;
 
+    // Ses bileþeni referansý
+    private AudioSource audioSource;
     private bool isPlayerNearby = false;
+    private bool isCollected = false; // Eþya toplandý mý kontrolü (Tekrar tetiklenmemesi için)
 
-    // Eþyaya yaklaþýldýðýnda (Trigger'a girildiðinde)
+    private void Start()
+    {
+        // Objenin üzerindeki AudioSource'u al
+        audioSource = GetComponent<AudioSource>();
+    }
+
     private void OnTriggerEnter(Collider other)
     {
+        // Eðer zaten toplandýysa tekrar iþlem yapma
+        if (isCollected) return;
+
         if (other.CompareTag("Player"))
         {
             isPlayerNearby = true;
@@ -26,12 +36,10 @@ public class CollectableItem : MonoBehaviour
             else
             {
                 Debug.Log($"[{itemType}] Toplamak için 'E' tuþuna basýn.");
-                // Burada isterseniz ekranda bir UI mesajý gösterebilirsiniz.
             }
         }
     }
 
-    // Eþyadan uzaklaþýldýðýnda (Trigger'dan çýkýldýðýnda)
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -40,28 +48,18 @@ public class CollectableItem : MonoBehaviour
         }
     }
 
-    // Sadece "E" tuþu ile toplama yöntemini kullanýyorsanýz Update() gerekli
     private void Update()
     {
-        // Eðer Eþya yakýnda ise, tetikleyici kapalýysa VE oyuncu "E" tuþuna bastýysa
-        // Karakterin `FirstPersonController` scriptindeki `HandleInteraction()` metodu da Raycast ile
-        // toplama yapabilir, ancak sizin Raycast kodunuz sadece kapý için optimize edilmiþ.
-        // Bu yüzden, daha basit bir yol olarak burada Input sistemi kontrolü yapabiliriz.
-
-        // **ÖNEMLÝ:** Eðer Raycast kullanmak istiyorsanýz, bu kodu silin ve `FirstPersonController`
-        // scriptinizdeki `HandleInteraction()` metodunu düzenlemeniz gerekir (bir sonraki bölümde açýklayacaðým).
+        if (isCollected) return; // Toplandýysa update'i çalýþtýrma
 
         if (!collectOnTrigger && isPlayerNearby)
         {
-            // Yeni Input Sistemi ile 'E' tuþu kontrolü (Sizin Controller'ýnýzdaki gibi)
 #if ENABLE_INPUT_SYSTEM
             if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.eKey.wasPressedThisFrame)
             {
-                // Oyuncu objesini bul (Collider'ýn parent'ý)
                 Collect(GameObject.FindGameObjectWithTag("Player"));
             }
 #else
-            // Eski Input Sistemi
             if (Input.GetKeyDown(KeyCode.E))
             {
                 Collect(GameObject.FindGameObjectWithTag("Player"));
@@ -70,20 +68,52 @@ public class CollectableItem : MonoBehaviour
         }
     }
 
-    // Toplama iþlemini gerçekleþtiren ana fonksiyon
     private void Collect(GameObject player)
     {
         ItemCollector collector = player.GetComponent<ItemCollector>();
 
         if (collector != null)
         {
+            // 1. Envantere ekle
             collector.CollectItem(itemType);
-            // Eþyayý sahneden kaldýr
-            Destroy(gameObject);
+
+            // 2. Bayraðý kaldýr (tekrar toplanmasýný engelle)
+            isCollected = true;
+
+            // 3. Ses ve Yok Etme Ýþlemleri
+            if (audioSource != null && audioSource.clip != null)
+            {
+                // Sesi çal
+                audioSource.Play();
+
+                // Objenin görüntüsünü kapat (MeshRenderer)
+                Renderer myRenderer = GetComponent<Renderer>();
+                if (myRenderer != null)
+                    myRenderer.enabled = false;
+
+                // Objenin fiziðini kapat (Collider) - Böylece içinden geçilebilir olur
+                Collider myCollider = GetComponent<Collider>();
+                if (myCollider != null)
+                    myCollider.enabled = false;
+
+                // Varsa alt objelerdeki (çocuklardaki) görselleri de kapatmak için:
+                foreach (Transform child in transform)
+                {
+                    child.gameObject.SetActive(false);
+                }
+
+                // Sesi çalmasý için objeyi sesin süresi kadar sahnede tut, sonra yok et
+                Destroy(gameObject, audioSource.clip.length);
+            }
+            else
+            {
+                // Ses yoksa hemen yok et
+                Destroy(gameObject);
+            }
         }
         else
         {
-            Debug.LogError("Oyuncuda ItemCollector scripti bulunamadý. Lütfen eklediðinizden emin olun.");
+            Debug.LogError("Oyuncuda ItemCollector scripti bulunamadý.");
         }
     }
 }

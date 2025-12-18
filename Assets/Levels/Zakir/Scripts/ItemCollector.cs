@@ -7,7 +7,8 @@ public class ItemCollector : MonoBehaviour
     {
         KasaAnahtari,
         EskiNot,
-        KirmiziTas
+        KirmiziTas,
+        UluKapsul
     }
 
     [Header("Required Items")]
