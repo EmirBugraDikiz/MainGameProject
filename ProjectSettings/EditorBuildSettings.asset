@@ -15,7 +15,7 @@ EditorBuildSettings:
     path: Assets/Levels/Emir/Scenes/Scene1.unity
     guid: 2cc56ec64608b8347930e286ecb9e7d7
   - enabled: 1
-    path: Assets/Levels/Burak/Scenes/Level1/Room1_Orientation.unity
+    path: Assets/Levels/Burak/Scenes/Level2/Room1_Orientation.unity
     guid: a9e8990b515d9674da24f5b93fd2bf2b
   - enabled: 1
     path: Assets/Levels/Zakir/Scenes/Map_HospSON.unity
