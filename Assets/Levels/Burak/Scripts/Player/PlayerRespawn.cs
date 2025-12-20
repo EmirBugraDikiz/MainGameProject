@@ -105,6 +105,7 @@ public class PlayerRespawn : MonoBehaviour
         if (abilities != null)
         {
             abilities.ResetVelocity();
+            abilities.ForceDisableKronos();
         }
     }
 }

@@ -339,4 +339,12 @@ public class PlayerAbilitiesController : MonoBehaviour
         jumpsUsed = 0;
         stepTimer = 0f;
     }
+
+    // ==== NEW: Respawn sonrası kronos state reset ====
+    public void ForceDisableKronos()
+    {
+        kronosActive = false;
+        Time.timeScale = 1f;
+        Time.fixedDeltaTime = baseFixedDeltaTime;
+    }
 }
