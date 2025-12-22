@@ -17,13 +17,15 @@ public class NarratorFaceController : MonoBehaviour
     public float glitchPulseSpeed = 6f;
     public float glitchPulseAmount = 0.15f;
 
+    [Header("Debug")]
+    public bool enableTestKeys = false; // editor test için
+
     private Renderer rend;
     private Material runtimeMat;
 
     private enum Mode { Idle, Talk, Angry }
     private Mode mode = Mode.Idle;
 
-    // Shader property IDs (Reference isimlerin bunlarsa çalışır)
     static readonly int MouthOpenID = Shader.PropertyToID("_MouthOpen");
     static readonly int GlitchAmountID = Shader.PropertyToID("_GlitchAmount");
     static readonly int FlickerID = Shader.PropertyToID("_Flicker");
@@ -41,21 +43,21 @@ public class NarratorFaceController : MonoBehaviour
 
     void Update()
     {
-        // Test için: 1-2-3 ile mod değiştir
-        if (Input.GetKeyDown(KeyCode.Alpha1)) SetIdle();
-        if (Input.GetKeyDown(KeyCode.Alpha2)) SetTalk();
-        if (Input.GetKeyDown(KeyCode.Alpha3)) SetAngry();
+        if (enableTestKeys)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1)) SetIdle();
+            if (Input.GetKeyDown(KeyCode.Alpha2)) SetTalk();
+            if (Input.GetKeyDown(KeyCode.Alpha3)) SetAngry();
+        }
 
         if (runtimeMat == null) return;
 
         if (mode == Mode.Talk && animateWhenTalking)
         {
-            // Mouth animation
             float t = (Mathf.Sin(Time.time * mouthSpeed) + 1f) * 0.5f;
             float mouth = Mathf.Lerp(mouthRange.x, mouthRange.y, t);
             runtimeMat.SetFloat(MouthOpenID, mouth);
 
-            // Glitch pulse
             if (glitchPulseWhenTalking)
             {
                 float p = (Mathf.Sin(Time.time * glitchPulseSpeed) + 1f) * 0.5f;
@@ -66,7 +68,6 @@ public class NarratorFaceController : MonoBehaviour
 
         if (mode == Mode.Angry)
         {
-            // Angry: step edge'i bazen düşür (daha kuduruk glitch)
             float p = (Mathf.Sin(Time.time * 8f) + 1f) * 0.5f;
             float edge = Mathf.Lerp(0.2f, baseStepEdge, 1f - p * 0.7f);
             runtimeMat.SetFloat(StepEdgeID, edge);
@@ -77,7 +78,7 @@ public class NarratorFaceController : MonoBehaviour
     {
         if (rend == null || preset == null) return;
 
-        runtimeMat = new Material(preset); // instance
+        runtimeMat = new Material(preset);
         rend.material = runtimeMat;
 
         baseGlitch = runtimeMat.HasProperty(GlitchAmountID) ? runtimeMat.GetFloat(GlitchAmountID) : 0f;

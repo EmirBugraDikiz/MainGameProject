@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 95bec7fb02595b34189f1413397c30b0
+timeCreated: 1521116255
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 131093
+  packageName: Minimalist ArchViz Bedroom
+  packageVersion: 1.0
+  assetPath: Assets/MinimalistBedroom/Materials/Fabric/Rug_1k/Rug_1k_01.mat
+  uploadId: 409061

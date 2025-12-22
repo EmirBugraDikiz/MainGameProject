@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 3e23a0ee448e8854a82f5a1ac6d49f4c
+timeCreated: 1519297173
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 131093
+  packageName: Minimalist ArchViz Bedroom
+  packageVersion: 1.0
+  assetPath: Assets/MinimalistBedroom/Models/Interior/Materials/No Name.mat
+  uploadId: 409061

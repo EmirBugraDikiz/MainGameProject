@@ -53,6 +53,10 @@ public class NarratorEntrySequence : MonoBehaviour
     [Header("Timing")]
     public float liftStartDelay = 0.12f;
 
+    [Header("Narrator Lines (Start After Lift Begins)")]
+    public NarratorSequenceController narratorSequence;
+    public float narratorStartAfterLiftBegins = 0.6f;
+
     private bool triggered;
 
     void Awake()
@@ -94,8 +98,18 @@ public class NarratorEntrySequence : MonoBehaviour
         if (liftStartDelay > 0f)
             yield return new WaitForSeconds(liftStartDelay);
 
-        // 3) TheNARRATOR'ı yükselt
+        // 3) Lift başlarken (gecikmeli) narrator replik akışını başlat
+        if (narratorSequence != null)
+            StartCoroutine(StartNarratorAfterDelay(narratorStartAfterLiftBegins));
+
+        // 4) TheNARRATOR'ı yükselt
         yield return StartCoroutine(LiftNarratorRoot());
+    }
+
+    private IEnumerator StartNarratorAfterDelay(float delay)
+    {
+        if (delay > 0f) yield return new WaitForSeconds(delay);
+        narratorSequence?.StartSequence();
     }
 
     private IEnumerator SlamCloseDoors()

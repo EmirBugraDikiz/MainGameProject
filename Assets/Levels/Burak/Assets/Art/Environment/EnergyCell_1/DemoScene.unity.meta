@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: bbc428b57396afd4f9030476fb2121f1
+timeCreated: 1558190939
+licenseType: Store
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 154526
+  packageName: HiTech SciFi Energy Cell
+  packageVersion: 1.0
+  assetPath: Assets/HiTech/Energy/EnergyCell_1/DemoScene.unity
+  uploadId: 330685

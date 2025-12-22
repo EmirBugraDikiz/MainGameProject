@@ -1,0 +1,30 @@
+fileFormatVersion: 2
+guid: f40d62656c4d042c1bde9628b70d84c2
+AudioImporter:
+  externalObjects: {}
+  serializedVersion: 7
+  defaultSettings:
+    serializedVersion: 2
+    loadType: 0
+    sampleRateSetting: 0
+    sampleRateOverride: 44100
+    compressionFormat: 1
+    quality: 1
+    conversionMode: 0
+    preloadAudioData: 0
+  platformSettingOverrides: {}
+  forceToMono: 0
+  normalize: 1
+  loadInBackground: 0
+  ambisonic: 0
+  3D: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 284903
+  packageName: Cosmic Transitions Sound Effects Pack
+  packageVersion: 1.0
+  assetPath: Assets/CosmicTransitionsSFXPack/DSGNWhsh_Whoosh Gradual Teleport Medium_RSCPC_CSTR.wav
+  uploadId: 663669

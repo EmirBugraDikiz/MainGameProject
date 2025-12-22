@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: d11086f697c96854d96f22a6165ecd25
+timeCreated: 1569067169
+licenseType: Store
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 154526
+  packageName: HiTech SciFi Energy Cell
+  packageVersion: 1.0
+  assetPath: Assets/HiTech/Energy/EnergyCell_1/Prefabs/EnergyCell_1_4.prefab
+  uploadId: 330685

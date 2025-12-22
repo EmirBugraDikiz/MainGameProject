@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: f7f89a45e5740c94882b7a566b254c93
+timeCreated: 1521118681
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 131093
+  packageName: Minimalist ArchViz Bedroom
+  packageVersion: 1.0
+  assetPath: Assets/MinimalistBedroom/Prefabs/Interior/Plant_a_01.prefab
+  uploadId: 409061

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 83fed050d17dbde42b6cbd5871197c81
+timeCreated: 1514928677
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 131093
+  packageName: Minimalist ArchViz Bedroom
+  packageVersion: 1.0
+  assetPath: Assets/MinimalistBedroom/Materials/Misc/DirtyWindow_2k_01/DirtyWindow_01.mat
+  uploadId: 409061

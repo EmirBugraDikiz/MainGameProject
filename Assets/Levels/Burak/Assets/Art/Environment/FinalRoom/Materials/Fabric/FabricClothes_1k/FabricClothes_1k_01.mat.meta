@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 967a9188d3185db4dacf75304337633e
+timeCreated: 1521115586
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 131093
+  packageName: Minimalist ArchViz Bedroom
+  packageVersion: 1.0
+  assetPath: Assets/MinimalistBedroom/Materials/Fabric/FabricClothes_1k/FabricClothes_1k_01.mat
+  uploadId: 409061

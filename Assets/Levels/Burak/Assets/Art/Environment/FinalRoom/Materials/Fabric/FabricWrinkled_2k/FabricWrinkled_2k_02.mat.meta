@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 96668d316ec6b724a95d5917c7e17e78
+timeCreated: 1521116050
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 131093
+  packageName: Minimalist ArchViz Bedroom
+  packageVersion: 1.0
+  assetPath: Assets/MinimalistBedroom/Materials/Fabric/FabricWrinkled_2k/FabricWrinkled_2k_02.mat
+  uploadId: 409061

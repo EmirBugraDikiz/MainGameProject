@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: edc45d9be05dd84408a6fd2a1587ffe5
+timeCreated: 1521117009
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 131093
+  packageName: Minimalist ArchViz Bedroom
+  packageVersion: 1.0
+  assetPath: Assets/MinimalistBedroom/Prefabs/Exterior/WindowFrame_01.prefab
+  uploadId: 409061

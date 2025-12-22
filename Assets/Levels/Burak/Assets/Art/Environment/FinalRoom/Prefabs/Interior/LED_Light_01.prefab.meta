@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 07a62369b02a1a542b0b4ae761e52728
+timeCreated: 1521118428
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 131093
+  packageName: Minimalist ArchViz Bedroom
+  packageVersion: 1.0
+  assetPath: Assets/MinimalistBedroom/Prefabs/Interior/LED_Light_01.prefab
+  uploadId: 409061

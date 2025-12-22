@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Levels/Zakir/Scenes/Map_HospSON.unity
     guid: 7bdc31c0d08cfb6448551a872d8ab318
+  - enabled: 1
+    path: Assets/Levels/Burak/Scenes/Level4/FinishScene.unity
+    guid: 630e96e248833cf46bdd407d6b61bf93
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

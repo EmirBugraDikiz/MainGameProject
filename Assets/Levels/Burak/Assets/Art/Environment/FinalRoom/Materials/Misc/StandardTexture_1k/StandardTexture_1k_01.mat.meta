@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: fc41dd87f8c91524698b364d6a891b74
+timeCreated: 1521117793
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 131093
+  packageName: Minimalist ArchViz Bedroom
+  packageVersion: 1.0
+  assetPath: Assets/MinimalistBedroom/Materials/Misc/StandardTexture_1k/StandardTexture_1k_01.mat
+  uploadId: 409061
