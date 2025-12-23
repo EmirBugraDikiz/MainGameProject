@@ -6,7 +6,11 @@ public class SpikeKill : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
 
-        // Player'ın ana objesinde PlayerRespawn vardır, collider child olabilir diye parent'tan da ara
+        // 🔴 ZONE TRACKER BURADA ÇAĞRILMALI
+        var tracker = other.GetComponentInParent<L1ZoneTracker>();
+        if (tracker != null)
+            tracker.OnPlayerKilled();
+
         var respawn = other.GetComponentInParent<PlayerRespawn>();
         if (respawn != null)
         {
@@ -14,7 +18,6 @@ public class SpikeKill : MonoBehaviour
             return;
         }
 
-        // fallback (istersen kalsın)
         var death = other.GetComponentInParent<PlayerDeath>();
         if (death != null)
             death.Die();
