@@ -192,4 +192,22 @@ public class SpikeCubeTrap : MonoBehaviour
             sfxSource.clip = null;
         }
     }
+
+    public void ResetForRespawn(bool resetToBack = true)
+    {
+        playerLanded = false;
+        hasAttackedSinceLanding = false;
+        sinceLanding = 0f;
+        t = 0f;
+
+        state = State.IdleAtBack;
+        lastState = (State)(-1); // state change'i zorla
+
+        StopChainLoop();
+
+        if (resetToBack && backPos != null)
+            transform.position = backPos.position;
+
+        HandleStateChange(force: true);
+    }
 }

@@ -23,11 +23,20 @@ public class EnergyCellSocketInteract : MonoBehaviour
     [SerializeField] private AudioSource machineSource;     // Machine Bits (loop + fade)
 
     [Header("Audio Clips")]
-    [SerializeField] private AudioClip coverClip;           // ilk E: kapak sesi (Metal_Shield_Open vs hangisi kapaksa)
+    [SerializeField] private AudioClip coverClip;           // ilk E: kapak sesi
     [SerializeField] private AudioClip installClip;         // Install_Fuse.wav
     [SerializeField] private AudioClip accessDeniedClip;    // Access_Denied.wav
     [SerializeField] private AudioClip alarmClip;           // Allarm_Sound.wav
     [SerializeField] private AudioClip machineBitsClip;     // Machine Bits 5.wav
+
+    [Header("Narrator VO")]
+    [SerializeField] private AudioClip narratorNoCellClip;  // L4_08_Without_Fuse.wav
+    [SerializeField] private bool narratorNoCellOnce = true;
+    private bool narratorNoCellPlayed = false;
+
+    [SerializeField] private AudioClip narratorDoorOpenClip; // L4_09_Door_Open.wav
+    [SerializeField] private bool narratorDoorOpenOnce = true;
+    private bool narratorDoorOpenPlayed = false;
 
     [Header("Step1 - Cup Local X")]
     [SerializeField] private float cupStartX = -90f;
@@ -84,14 +93,32 @@ public class EnergyCellSocketInteract : MonoBehaviour
 
     private IEnumerator Step2_InstallAndOpenDoors()
     {
-        // Cell yoksa deny
+        // Cell yoksa deny + narrator (1 kere)
         if (!GateInventory.HasEnergyCell)
         {
             PlayOneShot(sfxSource, accessDeniedClip);
+
+            if (narratorNoCellClip != null && (!narratorNoCellOnce || !narratorNoCellPlayed))
+            {
+                narratorNoCellPlayed = true;
+
+                if (NarratorAudioQueue.Instance != null)
+                    NarratorAudioQueue.Instance.Enqueue(narratorNoCellClip);
+            }
+
             yield break;
         }
 
         state = State.Installing;
+
+        // ✅ Narrator: kapı açılıyor / güç verildi (1 kere)
+        if (narratorDoorOpenClip != null && (!narratorDoorOpenOnce || !narratorDoorOpenPlayed))
+        {
+            narratorDoorOpenPlayed = true;
+
+            if (NarratorAudioQueue.Instance != null)
+                NarratorAudioQueue.Instance.Enqueue(narratorDoorOpenClip);
+        }
 
         // 1) takma sesi
         PlayOneShot(sfxSource, installClip);
@@ -134,7 +161,7 @@ public class EnergyCellSocketInteract : MonoBehaviour
             machineSource.Play();
         }
 
-        // kapılar alarm bitene kadar açılsın:
+        // kapılar alarm bitene kadar açılsın
         float doorsDuration = Mathf.Max(0.1f, alarmLen - doorStartDelay);
         yield return MoveDoorsLocalZ(doorsDuration);
 
@@ -186,7 +213,7 @@ public class EnergyCellSocketInteract : MonoBehaviour
             yield return null;
         }
         src.Stop();
-        src.volume = startVol; // eski haline getir
+        src.volume = startVol;
     }
 
     private IEnumerator RotateLocalX(Transform tr, float fromX, float toX, float duration, AnimationCurve curve)

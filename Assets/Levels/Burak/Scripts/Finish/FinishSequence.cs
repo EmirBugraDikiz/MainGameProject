@@ -1,11 +1,16 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class FinishSequence : MonoBehaviour
 {
     [Header("Timings")]
     public float animationTotalDuration = 6.19f;
+
+    [Header("Fade In From White")]
+    public Image whiteFadeImage;
+    public float whiteFadeInDuration = 1f;
 
     [Header("UI")]
     public GameObject blackPanel;
@@ -28,6 +33,16 @@ public class FinishSequence : MonoBehaviour
 
     void Start()
     {
+        // Start full white, then fade to normal (connects with previous scene)
+        if (whiteFadeImage)
+        {
+            var c = whiteFadeImage.color;
+            c.a = 1f;
+            whiteFadeImage.color = c;
+            whiteFadeImage.gameObject.SetActive(true);
+            StartCoroutine(WhiteFadeIn());
+        }
+
         if (blackPanel) blackPanel.SetActive(false);
         if (titleImage) titleImage.SetActive(false);
         if (exitHintText) exitHintText.SetActive(false);
@@ -50,6 +65,33 @@ public class FinishSequence : MonoBehaviour
         {
             SceneManager.LoadScene(mainMenuSceneName);
         }
+    }
+
+    IEnumerator WhiteFadeIn()
+    {
+        if (!whiteFadeImage) yield break;
+
+        float t = 0f;
+
+        while (t < whiteFadeInDuration)
+        {
+            t += Time.deltaTime;
+            float a = 1f - (t / whiteFadeInDuration);
+
+            var c = whiteFadeImage.color;
+            c.a = Mathf.Clamp01(a);
+            whiteFadeImage.color = c;
+
+            yield return null;
+        }
+
+        // Fully transparent now
+        var finalC = whiteFadeImage.color;
+        finalC.a = 0f;
+        whiteFadeImage.color = finalC;
+
+        // Optional: disable to avoid blocking raycasts etc.
+        whiteFadeImage.gameObject.SetActive(false);
     }
 
     IEnumerator Sequence()

@@ -18,7 +18,7 @@ public class NarratorFaceController : MonoBehaviour
     public float glitchPulseAmount = 0.15f;
 
     [Header("Debug")]
-    public bool enableTestKeys = false; // editor test için
+    public bool enableTestKeys = false;
 
     private Renderer rend;
     private Material runtimeMat;
@@ -35,13 +35,13 @@ public class NarratorFaceController : MonoBehaviour
     float baseFlicker;
     float baseStepEdge;
 
-    void Awake()
+    private void Awake()
     {
         rend = GetComponent<Renderer>();
         SetIdle();
     }
 
-    void Update()
+    private void Update()
     {
         if (enableTestKeys)
         {
@@ -74,9 +74,12 @@ public class NarratorFaceController : MonoBehaviour
         }
     }
 
-    void Apply(Material preset)
+    private void Apply(Material preset)
     {
         if (rend == null || preset == null) return;
+
+        if (runtimeMat != null)
+            Destroy(runtimeMat);
 
         runtimeMat = new Material(preset);
         rend.material = runtimeMat;

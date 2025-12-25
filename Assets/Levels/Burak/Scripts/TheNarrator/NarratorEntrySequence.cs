@@ -16,7 +16,6 @@ public class NarratorEntrySequence : MonoBehaviour
     [Header("Door Slam")]
     public float doorSlamDuration = 0.35f;
 
-    // Zıbamm hissi: ilk %15’te %85 kapanma
     public AnimationCurve slamCurve = new AnimationCurve(
         new Keyframe(0f, 0f),
         new Keyframe(0.15f, 0.85f),
@@ -30,7 +29,7 @@ public class NarratorEntrySequence : MonoBehaviour
     public Vector2 slamPitchRange = new Vector2(0.95f, 1.05f);
 
     [Header("Narrator Platform Lift (TheNARRATOR root)")]
-    public Transform narratorRoot;   // TheNARRATOR objesi (root)
+    public Transform narratorRoot;
     public float startY = -30f;
     public float endY = 0f;
     public float liftDuration = 8f;
@@ -42,11 +41,8 @@ public class NarratorEntrySequence : MonoBehaviour
     [Range(0f, 1f)] public float liftLoopVolume = 0.6f;
 
     [Header("Music Switch (Optional)")]
-    [Tooltip("BackgroundMusic objesindeki MusicSwitcher componenti buraya.")]
     public MusicSwitcher music;
-    [Tooltip("Trigger sonrası geçilecek gerici müzik / ambience (Low Hum 2).")]
     public AudioClip lowHum2Clip;
-    [Tooltip("-1 bırakırsan mevcut müzik volume'u korunur.")]
     public float lowHum2TargetVolume = -1f;
     public bool switchMusicOnTrigger = true;
 
@@ -59,9 +55,8 @@ public class NarratorEntrySequence : MonoBehaviour
 
     private bool triggered;
 
-    void Awake()
+    private void Awake()
     {
-        // TheNARRATOR başlangıçta belirlediğin Y'e çekilsin (sadece Y)
         if (narratorRoot != null)
         {
             Vector3 p = narratorRoot.position;
@@ -76,33 +71,31 @@ public class NarratorEntrySequence : MonoBehaviour
 
         triggered = true;
 
-        // Trigger bir daha çalışmasın diye colliderı kapat
+        // bir daha çalışmasın
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
 
-        // Müzik switch (fade)
+        // müzik switch
         if (switchMusicOnTrigger && music != null && lowHum2Clip != null)
-        {
             music.SwitchTo(lowHum2Clip, lowHum2TargetVolume);
-        }
 
         StartCoroutine(SequenceRoutine());
     }
 
     private IEnumerator SequenceRoutine()
     {
-        // 1) Kapıları slam kapat
+        // 1) kapıları slam kapat
         yield return StartCoroutine(SlamCloseDoors());
 
-        // 2) minicik nefes
+        // 2) lift öncesi minicik nefes
         if (liftStartDelay > 0f)
             yield return new WaitForSeconds(liftStartDelay);
 
-        // 3) Lift başlarken (gecikmeli) narrator replik akışını başlat
+        // 3) lift başlarken narrator konuşmaları başlasın (async)
         if (narratorSequence != null)
             StartCoroutine(StartNarratorAfterDelay(narratorStartAfterLiftBegins));
 
-        // 4) TheNARRATOR'ı yükselt
+        // 4) lift
         yield return StartCoroutine(LiftNarratorRoot());
     }
 
@@ -120,7 +113,7 @@ public class NarratorEntrySequence : MonoBehaviour
             yield break;
         }
 
-        // Slam SFX
+        // slam sfx
         if (sfxSource != null && doorSlamClip != null)
         {
             float oldPitch = sfxSource.pitch;
@@ -160,7 +153,7 @@ public class NarratorEntrySequence : MonoBehaviour
             yield break;
         }
 
-        // Lift loop SFX
+        // lift loop
         if (liftLoopSource != null && liftLoopClip != null)
         {
             liftLoopSource.clip = liftLoopClip;
@@ -186,8 +179,6 @@ public class NarratorEntrySequence : MonoBehaviour
         narratorRoot.position = endPos;
 
         if (liftLoopSource != null && liftLoopSource.isPlaying)
-        {
             liftLoopSource.Stop();
-        }
     }
 }

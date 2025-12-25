@@ -5,25 +5,39 @@ public class ExitButtonInteract : MonoBehaviour
 {
     [Header("Interact")]
     [SerializeField] private KeyCode interactKey = KeyCode.E;
-    [SerializeField] private Collider interactTrigger; // trigger collider
+    [SerializeField] private Collider interactTrigger;
     private bool playerInside;
 
     [Header("State")]
     [SerializeField] private bool unlocked = false;
     private bool used = false;
+    public bool IsUnlocked => unlocked;
 
     [Header("Button Visual (press part)")]
-    [SerializeField] private Transform pressPart; // pSphere1
-    [SerializeField] private float pressDownY = -10f; // local y
+    [SerializeField] private Transform pressPart;
+    [SerializeField] private float pressDownY = -10f;
     [SerializeField] private float pressDuration = 0.18f;
     [SerializeField] private AnimationCurve pressEase = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     [Header("Audio")]
     [SerializeField] private AudioSource sfxSource;
-    [SerializeField] private AudioClip confirmClip;      // buton onay sesi
-    [SerializeField] private AudioClip accessDeniedClip; // Access_Denied
+    [SerializeField] private AudioClip confirmClip;
+    [SerializeField] private AudioClip accessDeniedClip;
     [SerializeField, Range(0f, 1f)] private float confirmVolume = 1f;
     [SerializeField, Range(0f, 1f)] private float denyVolume = 1f;
+
+    [Header("Narrator VO")]
+    [Tooltip("Erken basınca çalan VO (L4_22)")]
+    [SerializeField] private AudioClip earlyPressNarratorClip;
+
+    [Tooltip("Buton aktifken basınca çalan FINAL VO (L4_24)")]
+    [SerializeField] private AudioClip finishNarratorClip;
+
+    [SerializeField] private bool earlyPressNarratorOnce = true;
+    private bool earlyPressNarratorPlayed = false;
+
+    [Tooltip("NarratorSequenceController (cutscene ile aynı olan)")]
+    [SerializeField] private NarratorSequenceController narratorSequence;
 
     [Header("Door")]
     [SerializeField] private SlidingDoorPair door;
@@ -31,6 +45,11 @@ public class ExitButtonInteract : MonoBehaviour
     private void Awake()
     {
         if (interactTrigger != null) interactTrigger.isTrigger = true;
+
+        if (narratorSequence == null)
+            narratorSequence = FindFirstObjectByType<NarratorSequenceController>();
+
+        if (sfxSource != null) sfxSource.playOnAwake = false;
     }
 
     private void Update()
@@ -43,6 +62,7 @@ public class ExitButtonInteract : MonoBehaviour
     public void Unlock()
     {
         unlocked = true;
+        Debug.Log("[ExitButtonInteract] EXIT BUTTON UNLOCKED!");
     }
 
     private void TryInteract()
@@ -52,15 +72,33 @@ public class ExitButtonInteract : MonoBehaviour
         if (!unlocked)
         {
             PlayOneShot(sfxSource, accessDeniedClip, denyVolume);
+            TryQueueEarlyNarratorVO();
             return;
         }
 
         used = true;
-        StartCoroutine(PressAndActivate());
+        StartCoroutine(PressFinishSequence());
     }
 
-    private IEnumerator PressAndActivate()
+    private void TryQueueEarlyNarratorVO()
     {
+        if (earlyPressNarratorClip == null) return;
+        if (earlyPressNarratorOnce && earlyPressNarratorPlayed) return;
+        earlyPressNarratorPlayed = true;
+
+        if (narratorSequence != null && narratorSequence.IsRunning)
+        {
+            narratorSequence.EnqueueInjectedAsTalk(earlyPressNarratorClip);
+            return;
+        }
+
+        if (NarratorAudioQueue.Instance != null)
+            NarratorAudioQueue.Instance.Enqueue(earlyPressNarratorClip);
+    }
+
+    private IEnumerator PressFinishSequence()
+    {
+        // 1) Buton animasyonu
         if (pressPart != null)
         {
             Vector3 start = pressPart.localPosition;
@@ -70,8 +108,25 @@ public class ExitButtonInteract : MonoBehaviour
             yield return MoveLocal(pressPart, down, start, pressDuration, pressEase);
         }
 
+        // 2) Confirm SFX
         PlayOneShot(sfxSource, confirmClip, confirmVolume);
 
+        // 3) FINAL narrator konuşması (L4_24) -> narrator voiceSource'tan ÇAL ve BEKLE
+        if (finishNarratorClip != null)
+        {
+            if (narratorSequence != null)
+            {
+                // Sequence çalışsa da çalışmasa da doğru davranır:
+                yield return narratorSequence.PlayStandalone(finishNarratorClip, asTalk: true);
+            }
+            else if (NarratorAudioQueue.Instance != null)
+            {
+                NarratorAudioQueue.Instance.Enqueue(finishNarratorClip);
+                yield return new WaitForSeconds(finishNarratorClip.length);
+            }
+        }
+
+        // 4) Kapıyı aç
         if (door != null)
             door.Open();
     }
