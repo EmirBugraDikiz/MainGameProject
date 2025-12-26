@@ -1,8 +1,8 @@
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.SceneManagement;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
@@ -66,10 +66,32 @@ public class CreatureAI : MonoBehaviour
     private DepthOfField _dof;
     private Vignette _vignette;
 
-    private Behaviour _playerAbilities;
-    private CharacterController _playerCC;
+    private PlayerRespawn _playerRespawn;
+    private PlayerAbilitiesController _playerAbilitiesController;
 
     private int _playerLayer = -1;
+
+    // ✅ Tüm canavarları resetlemek için global liste
+    private static readonly List<CreatureAI> s_allCreatures = new List<CreatureAI>();
+
+    // ✅ İlk hal için spawn pos/rot
+    private Vector3 _startPos;
+    private Quaternion _startRot;
+
+    // ✅ Kamera sapıtma fix: saldırı öncesi rotayı kaydet / geri bas
+    private Quaternion _camRotBeforeAttack;
+    private bool _camRotSaved = false;
+
+    void Awake()
+    {
+        if (!s_allCreatures.Contains(this))
+            s_allCreatures.Add(this);
+    }
+
+    void OnDestroy()
+    {
+        s_allCreatures.Remove(this);
+    }
 
     void Start()
     {
@@ -77,6 +99,9 @@ public class CreatureAI : MonoBehaviour
         _anim = GetComponent<Animator>();
         _audio = GetComponent<AudioSource>();
         _mainCam = Camera.main;
+
+        _startPos = transform.position;
+        _startRot = transform.rotation;
 
         var pObj = GameObject.FindGameObjectWithTag(playerTag);
         if (pObj != null) _player = pObj.transform;
@@ -88,10 +113,8 @@ public class CreatureAI : MonoBehaviour
             // Player layer'ını maskten çıkar (en kritik fix)
             obstacleMask &= ~(1 << _playerLayer);
 
-            Component c = _player.GetComponent("PlayerAbilitiesController");
-            if (c is Behaviour b) _playerAbilities = b;
-
-            _playerCC = _player.GetComponent<CharacterController>();
+            _playerRespawn = _player.GetComponent<PlayerRespawn>();
+            _playerAbilitiesController = _player.GetComponent<PlayerAbilitiesController>();
         }
 
         if (horrorVolume != null && horrorVolume.profile != null)
@@ -115,6 +138,7 @@ public class CreatureAI : MonoBehaviour
         _anim.SetFloat("Speed", _agent.velocity.magnitude);
         HandleFootsteps();
 
+        // Attack sırasında kamerayı kafaya kilitle
         if (currentState == State.Attack && _mainCam != null)
         {
             Transform target = headBone ? headBone : transform;
@@ -130,7 +154,7 @@ public class CreatureAI : MonoBehaviour
         switch (currentState)
         {
             case State.Patrol: PatrolLogic(); break;
-            case State.Chase:  ChaseLogic(); break;
+            case State.Chase:  ChaseLogic();  break;
             case State.Search: SearchLogic(); break;
         }
     }
@@ -249,8 +273,16 @@ public class CreatureAI : MonoBehaviour
         _agent.isStopped = true;
         _agent.velocity = Vector3.zero;
 
-        if (_playerAbilities != null) _playerAbilities.enabled = false;
-        if (_playerCC != null) _playerCC.enabled = false;
+        // ✅ Kamera sapıtma fix: saldırı öncesi rotayı kaydet
+        if (_mainCam != null && !_camRotSaved)
+        {
+            _camRotBeforeAttack = _mainCam.transform.rotation;
+            _camRotSaved = true;
+        }
+
+        // ✅ enabled=false yapmıyoruz. varsa sadece controlsEnabled kapatıyoruz.
+        if (_playerAbilitiesController != null)
+            _playerAbilitiesController.controlsEnabled = false;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -262,19 +294,86 @@ public class CreatureAI : MonoBehaviour
         if (attackSound) _audio.PlayOneShot(attackSound);
 
         yield return new WaitForSeconds(2.5f);
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+        if (horrorVolume != null) horrorVolume.weight = 0f;
+        if (_mainCam != null) _mainCam.fieldOfView = 60f;
+
+        // ✅ Kamera rotasını eski haline geri bas (respawn sonrası sapıtmayı keser)
+        if (_mainCam != null && _camRotSaved)
+        {
+            _mainCam.transform.rotation = _camRotBeforeAttack;
+            _camRotSaved = false;
+        }
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        // ✅ tüm canavarları ilk hale döndür
+        ResetAllCreaturesToInitial();
+
+        // ✅ ölümü death system ile tetikle (scene reset yok)
+        if (_playerRespawn != null) _playerRespawn.Kill();
+        else UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+
+        yield break;
     }
 
-    // =========================
-    // VISION: "duvardan görme" kill switch
-    // =========================
+    private static void ResetAllCreaturesToInitial()
+    {
+        for (int i = 0; i < s_allCreatures.Count; i++)
+        {
+            if (s_allCreatures[i] != null)
+                s_allCreatures[i].ResetToInitialState();
+        }
+    }
+
+    private void ResetToInitialState()
+    {
+        StopAllCoroutines();
+
+        if (horrorVolume != null) horrorVolume.weight = 0f;
+        if (_mainCam != null) _mainCam.fieldOfView = 60f;
+
+        _lastSeenPos = _startPos;
+        _lastSeenTime = -999f;
+        _searchEndTime = -999f;
+
+        _isAttacking = false;
+        currentState = State.Patrol;
+
+        if (_agent != null)
+        {
+            _agent.isStopped = false;
+            _agent.velocity = Vector3.zero;
+
+            if (_agent.enabled && _agent.isOnNavMesh)
+                _agent.Warp(_startPos);
+            else
+                transform.position = _startPos;
+        }
+        else
+        {
+            transform.position = _startPos;
+        }
+
+        transform.rotation = _startRot;
+
+        if (_anim != null)
+        {
+            _anim.Rebind();
+            _anim.Update(0f);
+        }
+
+        GoToRandomPoint();
+    }
+
     bool CanSeePlayer(out Vector3 seenPos)
     {
         seenPos = Vector3.zero;
         if (_player == null) return false;
 
         Vector3 eye = transform.position + Vector3.up * eyeHeight;
-        Vector3 target = _player.position + Vector3.up * 1.3f; // player aim height
+        Vector3 target = _player.position + Vector3.up * 1.3f;
 
         Vector3 dir = target - eye;
         float dist = dir.magnitude;
@@ -285,16 +384,11 @@ public class CreatureAI : MonoBehaviour
         if (Vector3.Angle(transform.forward, dir) > viewAngle * 0.5f)
             return false;
 
-        // RaycastAll: arada bir şey var mı? (Player layer zaten maskten çıkarıldı)
         RaycastHit[] hits = Physics.RaycastAll(
             eye, dir, dist, obstacleMask, QueryTriggerInteraction.Ignore);
 
         if (hits != null && hits.Length > 0)
-        {
-            // herhangi bir hit varsa: arada engel var demek -> GÖREMEZ
-            // (çünkü player layer maskte yok, player hit'e girmeyecek)
             return false;
-        }
 
         seenPos = _player.position;
         return true;

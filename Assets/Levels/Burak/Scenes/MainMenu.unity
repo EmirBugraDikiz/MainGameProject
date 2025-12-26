@@ -233,7 +233,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5389521700824258581, guid: 817319833dd713d45af5c2121e9649c7, type: 3}
       propertyPath: m_text
-      value: "PENCEREL\u0130"
+      value: PENCERELI
       objectReference: {fileID: 0}
     - target: {fileID: 5389521700824258581, guid: 817319833dd713d45af5c2121e9649c7, type: 3}
       propertyPath: m_fontSize
@@ -1433,7 +1433,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "SES SEV\u0130YES\u0130"
+  m_text: SES SEVIYESI
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1979,7 +1979,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\xC7\xD6Z\xDCN\xDCRL\xDCK"
+  m_text: COZUNURLUK
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2274,7 +2274,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "G\xD6R\xDCNT\xDC KAL\u0130TES\u0130"
+  m_text: GORUNTU KALITESI
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2705,7 +2705,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\xC7IKI\u015E"
+  m_text: CIKIS
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2899,7 +2899,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5389521700824258581, guid: 817319833dd713d45af5c2121e9649c7, type: 3}
       propertyPath: m_text
-      value: "Y\xDCKSEK"
+      value: YUKSEK
       objectReference: {fileID: 0}
     - target: {fileID: 5389521700824258581, guid: 817319833dd713d45af5c2121e9649c7, type: 3}
       propertyPath: m_fontSize
@@ -3728,7 +3728,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "G\xD6R\xDCNT\xDC AYARLARI"
+  m_text: GORUNTU AYARLARI
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4027,9 +4027,21 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "EME\u011E\u0130 GE\xC7ENLER\n\n\nBURAK CAN\nEM\u0130R BU\u011ERA D\u0130K\u0130Z\nMUHAMMED
-    ENES BAL\nMUHAMMED ZAK\u0130R DEM\u0130REL\n\nOYNADI\u011EINIZ \u0130\xC7\u0130N
-    TE\u015EEKK\xDCRLER..."
+  m_text: 'EMEGI GECENLER
+
+
+
+    BURAK CAN
+
+    EMIR BUGRA DIKIZ
+
+    MUHAMMED ENES
+    BAL
+
+    MUHAMMED ZAKIR DEMIREL
+
+
+    OYNADIGINIZ ICIN TESEKKURLER...'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4660,7 +4672,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f384f1075e8ee24e97d1ba3ec79c559, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameMainMenu
-  firstLevelSceneName: Room1_Orientation
+  firstLevelSceneName: Scene1
   panelMain: {fileID: 222951914}
   panelSettings: {fileID: 1073087821}
   panelAudio: {fileID: 1086299104}
@@ -5761,7 +5773,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Y\xDCKLEN\u0130YOR..."
+  m_text: YUKLENIYOR...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6239,7 +6251,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "GER\u0130"
+  m_text: GERI
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6620,7 +6632,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5389521700824258581, guid: 817319833dd713d45af5c2121e9649c7, type: 3}
       propertyPath: m_text
-      value: "D\xDC\u015E\xDCK"
+      value: DUSUK
       objectReference: {fileID: 0}
     - target: {fileID: 5389521700824258581, guid: 817319833dd713d45af5c2121e9649c7, type: 3}
       propertyPath: m_fontSize
@@ -7333,7 +7345,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "GER\u0130"
+  m_text: GERI
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -7470,7 +7482,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "EME\u011E\u0130 GE\xC7ENLER"
+  m_text: EMEGI GECENLER
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -7607,7 +7619,7 @@ Transform:
   m_GameObject: {fileID: 2054810714}
   serializedVersion: 2
   m_LocalRotation: {x: 0.005935481, y: 0.0006258711, z: -0.0074396916, w: -0.9999546}
-  m_LocalPosition: {x: 2110.8716, y: 251.77113, z: -421.2266}
+  m_LocalPosition: {x: 2110.8716, y: 251.77113, z: -545}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
