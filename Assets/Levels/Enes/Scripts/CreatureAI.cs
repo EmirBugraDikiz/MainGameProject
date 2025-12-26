@@ -1,47 +1,75 @@
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
-using UnityEngine.Rendering;             // Post-Processing Ana Kütüphanesi
-using UnityEngine.Rendering.Universal;   // URP kullanýyorsan bu gereklidir (Built-in ise hata verirse sil)
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
+[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(AudioSource))]
 public class CreatureAI : MonoBehaviour
 {
-    // Durum Makinesi
-    public enum State { Patrol, Roaring, Chase, Attack }
+    public enum State { Patrol, Roaring, Chase, Search, Attack }
     public State currentState;
 
-    [Header("Hýz ve Süre Ayarlarý")]
-    public float patrolSpeed = 2.0f;
-    public float chaseSpeed = 6.0f;
+    [Header("Target")]
+    public string playerTag = "Player";
+
+    [Header("Speed")]
+    public float patrolSpeed = 2f;
+    public float chaseSpeed = 6f;
+    public float searchSpeed = 3.5f;
+
+    [Header("Vision")]
+    public float viewRadius = 15f;
+    [Range(0, 360)] public float viewAngle = 110f;
+
+    [Tooltip("Inspector'da bunu EVERYTHING yap. Kod player layer'Ä±nÄ± otomatik Ã§Ä±karacak.")]
+    public LayerMask obstacleMask = ~0; // default: Everything
+
+    public float eyeHeight = 1.6f;
+
+    [Header("Memory & Search")]
+    public float memoryDuration = 5f;
+    public float searchDuration = 8f;
+    public float searchRadius = 6f;
+    public float giveUpDistance = 40f;
+
+    [Header("Combat")]
+    public float attackDistance = 2f;
     public float roarDuration = 2.6f;
 
-    [Header("Adým Sesleri")]
-    public AudioClip stepSound;    // Yürüme sesi buraya
-    public float walkStepInterval = 0.6f; // Yürürken kaç saniyede bir ses çýksýn?
-    public float runStepInterval = 0.35f; // Koþarken kaç saniyede bir ses çýksýn?
-    private float _nextStepTime;
+    [Header("Footsteps")]
+    public AudioClip stepSound;
+    public float walkStepInterval = 0.6f;
+    public float runStepInterval = 0.35f;
 
-    [Header("Görüþ Ayarlarý")]
-    public float viewRadius = 15f;
-    [Range(0, 360)]
-    public float viewAngle = 110f;
-    public LayerMask obstacleMask;
-
-    [Header("Sinematik ve Efektler")]
+    [Header("Cinematic")]
     public Transform headBone;
     public AudioClip roarSound;
     public AudioClip attackSound;
-    public Volume horrorVolume;   // Post-Processing Volume
+    public Volume horrorVolume;
 
     private NavMeshAgent _agent;
     private Animator _anim;
-    private Transform _player;
     private AudioSource _audio;
     private Camera _mainCam;
+    private Transform _player;
 
-    // Post-Process Kontrolü için deðiþkenler
-    private DepthOfField _dofComponent;
-    private Vignette _vignetteComponent;
+    private float _nextStepTime;
+    private bool _isAttacking;
+
+    private Vector3 _lastSeenPos;
+    private float _lastSeenTime = -999f;
+    private float _searchEndTime = -999f;
+
+    private DepthOfField _dof;
+    private Vignette _vignette;
+
+    private Behaviour _playerAbilities;
+    private CharacterController _playerCC;
+
+    private int _playerLayer = -1;
 
     void Start()
     {
@@ -50,36 +78,31 @@ public class CreatureAI : MonoBehaviour
         _audio = GetComponent<AudioSource>();
         _mainCam = Camera.main;
 
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-        if (playerObj != null) _player = playerObj.transform;
+        var pObj = GameObject.FindGameObjectWithTag(playerTag);
+        if (pObj != null) _player = pObj.transform;
 
-        if (obstacleMask == 0) obstacleMask = LayerMask.GetMask("Default");
-
-        // --- Volume Bileþenlerini Bulma ---
-        if (horrorVolume != null && horrorVolume.profile != null)
+        if (_player != null)
         {
-            // Depth of Field ve Vignette ayarlarýný çekiyoruz
-            horrorVolume.profile.TryGet(out _dofComponent);
-            horrorVolume.profile.TryGet(out _vignetteComponent);
+            _playerLayer = _player.gameObject.layer;
 
-            // Baþlangýçta Vignette rengini Koyu Kýrmýzýya zorla (Garanti olsun)
-            if (_vignetteComponent != null)
-            {
-                _vignetteComponent.color.Override(new Color(0.3f, 0f, 0f)); // Koyu Kan Kýrmýzýsý
-            }
+            // Player layer'Ä±nÄ± maskten Ã§Ä±kar (en kritik fix)
+            obstacleMask &= ~(1 << _playerLayer);
+
+            Component c = _player.GetComponent("PlayerAbilitiesController");
+            if (c is Behaviour b) _playerAbilities = b;
+
+            _playerCC = _player.GetComponent<CharacterController>();
         }
 
-        //// DEGISTIRILEBILIR KISIM
-        //// Scriptin Start() fonksiyonunun içi:
+        if (horrorVolume != null && horrorVolume.profile != null)
+        {
+            horrorVolume.profile.TryGet(out _dof);
+            horrorVolume.profile.TryGet(out _vignette);
+            horrorVolume.weight = 0f;
 
-        //if (_vignetteComponent != null)
-        //{
-        //    // Rengi Koyu Kýrmýzý Yap
-        //    _vignetteComponent.color.Override(new Color(0.5f, 0f, 0f));
-
-        //    // ÞÝDDETÝ KODLA ZORLA (Bunu ekle!)
-        //    _vignetteComponent.intensity.Override(0.8f); // 0.8 ile 1.0 arasý çok koyu yapar
-        //}
+            if (_vignette != null)
+                _vignette.color.Override(new Color(0.4f, 0f, 0f));
+        }
 
         currentState = State.Patrol;
         GoToRandomPoint();
@@ -89,85 +112,53 @@ public class CreatureAI : MonoBehaviour
     {
         if (_player == null) return;
 
-        // NavMesh hýzý ile Animasyon hýzý senkronizasyonu
         _anim.SetFloat("Speed", _agent.velocity.magnitude);
-
-        // --- ADIM SESÝ KONTROLÜ ---
         HandleFootsteps();
 
-        // --- KAMERA KÝLÝDÝ (Saldýrý Aný) ---
         if (currentState == State.Attack && _mainCam != null)
         {
-            Transform target = headBone != null ? headBone : transform;
+            Transform target = headBone ? headBone : transform;
             _mainCam.transform.LookAt(target);
 
-            // BLUR DÜZELTME: Odak noktasýný sürekli canavarýn mesafesine ayarla
-            if (_dofComponent != null)
+            if (_dof != null)
             {
-                float distanceToCreature = Vector3.Distance(_mainCam.transform.position, target.position);
-                _dofComponent.focusDistance.value = distanceToCreature;
+                float d = Vector3.Distance(_mainCam.transform.position, target.position);
+                _dof.focusDistance.value = d;
             }
         }
 
         switch (currentState)
         {
             case State.Patrol: PatrolLogic(); break;
-            case State.Chase: ChaseLogic(); break;
+            case State.Chase:  ChaseLogic(); break;
+            case State.Search: SearchLogic(); break;
         }
     }
 
-    void HandleFootsteps()
-    {
-        // HATA DÜZELTME: Sadece hýz yetmez, diðer durumlarý da kontrol etmeliyiz.
-
-        // 1. NavMesh aktif mi ve hareket ediyor mu?
-        if (!_agent.isOnNavMesh || !_agent.enabled) return;
-
-        // 2. Canavarýn hýzý 0.5'ten büyük mü? (Hareket ediyor mu?)
-        bool isMoving = _agent.velocity.magnitude > 0.5f;
-
-        // 3. Hedefe henüz varmadý mý? (Vardýysa ses çalmasýn)
-        bool isNotAtDestination = _agent.remainingDistance > _agent.stoppingDistance;
-
-        // 4. NavMesh durdurulmuþ mu? (Roar veya Attack durumunda durur)
-        bool isAgentActive = !_agent.isStopped;
-
-        // TÜM ÞARTLAR SAÐLANIYORSA SES ÇAL
-        if (isMoving && isNotAtDestination && isAgentActive && currentState != State.Roaring && currentState != State.Attack)
-        {
-            if (Time.time >= _nextStepTime)
-            {
-                // Hangi aralýkla çalacaðýz? (Koþuyorsa sýk, yürüyorsa seyrek)
-                float interval = (currentState == State.Chase) ? runStepInterval : walkStepInterval;
-
-                // Sesi incelt/kalýnlaþtýr
-                _audio.pitch = (currentState == State.Chase) ? 1.3f : 0.9f;
-
-                if (stepSound != null) _audio.PlayOneShot(stepSound, 0.6f);
-
-                _nextStepTime = Time.time + interval;
-            }
-        }
-    }
-
-    // --- DEVRÝYE ---
     void PatrolLogic()
     {
         _agent.speed = patrolSpeed;
-        if (CanSeePlayer()) StartCoroutine(RoarRoutine());
-        if (!_agent.pathPending && _agent.remainingDistance < 0.5f) GoToRandomPoint();
+
+        if (CanSeePlayer(out var seenPos))
+        {
+            _lastSeenPos = seenPos;
+            _lastSeenTime = Time.time;
+            StartCoroutine(RoarRoutine());
+            return;
+        }
+
+        if (!_agent.pathPending && _agent.remainingDistance <= 0.5f)
+            GoToRandomPoint();
     }
 
-    // --- KÜKREME ---
     System.Collections.IEnumerator RoarRoutine()
     {
         currentState = State.Roaring;
         _agent.isStopped = true;
         _agent.velocity = Vector3.zero;
 
-        _audio.pitch = 1.0f; // Sesi normale döndür (Adým sesi bozmasýn)
         _anim.SetTrigger("Roar");
-        if (roarSound != null) _audio.PlayOneShot(roarSound);
+        if (roarSound) _audio.PlayOneShot(roarSound);
 
         yield return new WaitForSeconds(roarDuration);
 
@@ -175,88 +166,170 @@ public class CreatureAI : MonoBehaviour
         _agent.isStopped = false;
     }
 
-    // --- KOVALAMA ---
     void ChaseLogic()
     {
         _agent.speed = chaseSpeed;
-        if (_agent.isOnNavMesh) _agent.SetDestination(_player.position);
 
-        if (Vector3.Distance(transform.position, _player.position) > viewRadius * 1.5f)
+        if (Vector3.Distance(transform.position, _player.position) > giveUpDistance)
         {
             currentState = State.Patrol;
             GoToRandomPoint();
+            return;
         }
 
-        if (Vector3.Distance(transform.position, _player.position) < 2.0f)
+        if (CanSeePlayer(out var seenPos))
         {
-            StartCoroutine(AttackRoutine());
+            _lastSeenPos = seenPos;
+            _lastSeenTime = Time.time;
+
+            if (_agent.isOnNavMesh)
+                _agent.SetDestination(_player.position);
         }
+        else
+        {
+            if (_agent.isOnNavMesh)
+                _agent.SetDestination(_lastSeenPos);
+
+            if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + 0.2f)
+            {
+                currentState = State.Search;
+                _searchEndTime = Time.time + searchDuration;
+                PickNewSearchPoint();
+                return;
+            }
+
+            if (Time.time - _lastSeenTime > memoryDuration)
+            {
+                currentState = State.Search;
+                _searchEndTime = Time.time + searchDuration;
+                PickNewSearchPoint();
+                return;
+            }
+        }
+
+        if (!_isAttacking && Vector3.Distance(transform.position, _player.position) <= attackDistance)
+            StartCoroutine(AttackRoutine());
     }
 
-    // --- SALDIRI & SÝNEMATÝK ---
+    void SearchLogic()
+    {
+        _agent.speed = searchSpeed;
+
+        if (CanSeePlayer(out var seenPos))
+        {
+            _lastSeenPos = seenPos;
+            _lastSeenTime = Time.time;
+            currentState = State.Chase;
+            return;
+        }
+
+        if (Time.time >= _searchEndTime)
+        {
+            currentState = State.Patrol;
+            GoToRandomPoint();
+            return;
+        }
+
+        if (!_agent.pathPending && _agent.remainingDistance <= 0.6f)
+            PickNewSearchPoint();
+    }
+
+    void PickNewSearchPoint()
+    {
+        Vector3 point = GetRandomNavmeshPointNear(_lastSeenPos, searchRadius);
+        if (_agent.isOnNavMesh) _agent.SetDestination(point);
+    }
+
     System.Collections.IEnumerator AttackRoutine()
     {
-        Debug.Log("SALDIRI BAÞLADI! KOD BURAYA GÝRDÝ."); // <--- Bunu ekle
+        if (_isAttacking) yield break;
+        _isAttacking = true;
 
         currentState = State.Attack;
         _agent.isStopped = true;
         _agent.velocity = Vector3.zero;
 
-        if (horrorVolume != null)
-        {
-            Debug.Log("VOLUME BULUNDU, AÐIRLIK 1 YAPILIYOR."); // <--- Bunu ekle
-            horrorVolume.weight = 1f;
-        }
-        else
-        {
-            Debug.Log("DÝKKAT: Horror Volume BOÞ GÖRÜNÜYOR!"); // <--- Bunu ekle
-        }
+        if (_playerAbilities != null) _playerAbilities.enabled = false;
+        if (_playerCC != null) _playerCC.enabled = false;
 
-        // 1. Zoom Yap
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        if (horrorVolume != null) horrorVolume.weight = 1f;
         if (_mainCam != null) _mainCam.fieldOfView = 30f;
 
-        // 2. Korku Efektini Aç (Blur + Kýrmýzý Vignette)
-        if (horrorVolume != null) horrorVolume.weight = 1f;
-
-        // 3. Ses ve Animasyon
-        _audio.pitch = 1.0f; // Sesi normale döndür
         _anim.SetTrigger("Attack");
-        if (attackSound != null) _audio.PlayOneShot(attackSound);
+        if (attackSound) _audio.PlayOneShot(attackSound);
 
         yield return new WaitForSeconds(2.5f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    // --- GÖRÜÞ ---
-    bool CanSeePlayer()
+    // =========================
+    // VISION: "duvardan gÃ¶rme" kill switch
+    // =========================
+    bool CanSeePlayer(out Vector3 seenPos)
     {
+        seenPos = Vector3.zero;
         if (_player == null) return false;
-        Vector3 eyePos = transform.position + Vector3.up * 1.6f;
-        Vector3 playerEyePos = _player.position + Vector3.up * 1.6f;
-        Vector3 dirToPlayer = (playerEyePos - eyePos).normalized;
-        float dstToPlayer = Vector3.Distance(eyePos, playerEyePos);
 
-        if (dstToPlayer < viewRadius)
+        Vector3 eye = transform.position + Vector3.up * eyeHeight;
+        Vector3 target = _player.position + Vector3.up * 1.3f; // player aim height
+
+        Vector3 dir = target - eye;
+        float dist = dir.magnitude;
+
+        if (dist > viewRadius) return false;
+        dir /= dist;
+
+        if (Vector3.Angle(transform.forward, dir) > viewAngle * 0.5f)
+            return false;
+
+        // RaycastAll: arada bir ÅŸey var mÄ±? (Player layer zaten maskten Ã§Ä±karÄ±ldÄ±)
+        RaycastHit[] hits = Physics.RaycastAll(
+            eye, dir, dist, obstacleMask, QueryTriggerInteraction.Ignore);
+
+        if (hits != null && hits.Length > 0)
         {
-            if (Vector3.Angle(transform.forward, dirToPlayer) < viewAngle / 2)
-            {
-                if (!Physics.Raycast(eyePos, dirToPlayer, dstToPlayer, obstacleMask)) return true;
-            }
+            // herhangi bir hit varsa: arada engel var demek -> GÃ–REMEZ
+            // (Ã§Ã¼nkÃ¼ player layer maskte yok, player hit'e girmeyecek)
+            return false;
         }
-        return false;
+
+        seenPos = _player.position;
+        return true;
     }
 
-    void OnDrawGizmosSelected()
+    void HandleFootsteps()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, viewRadius);
+        if (!_agent.enabled || !_agent.isOnNavMesh) return;
+        if (_agent.isStopped) return;
+
+        bool moving = _agent.velocity.magnitude > 0.5f;
+        if (!moving) return;
+
+        if (Time.time >= _nextStepTime)
+        {
+            float interval = (currentState == State.Chase) ? runStepInterval : walkStepInterval;
+            _audio.pitch = (currentState == State.Chase) ? 1.3f : 0.95f;
+
+            if (stepSound) _audio.PlayOneShot(stepSound, 0.6f);
+            _nextStepTime = Time.time + interval;
+        }
     }
 
     void GoToRandomPoint()
     {
-        Vector3 randomDirection = Random.insideUnitSphere * 20f;
-        randomDirection += transform.position;
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(randomDirection, out hit, 20f, 1)) _agent.SetDestination(hit.position);
+        Vector3 rnd = Random.insideUnitSphere * 20f + transform.position;
+        if (NavMesh.SamplePosition(rnd, out NavMeshHit hit, 20f, NavMesh.AllAreas))
+            _agent.SetDestination(hit.position);
+    }
+
+    Vector3 GetRandomNavmeshPointNear(Vector3 center, float radius)
+    {
+        Vector3 rnd = Random.insideUnitSphere * radius + center;
+        if (NavMesh.SamplePosition(rnd, out NavMeshHit hit, radius, NavMesh.AllAreas))
+            return hit.position;
+        return center;
     }
 }

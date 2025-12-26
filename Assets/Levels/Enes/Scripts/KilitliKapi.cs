@@ -3,25 +3,25 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class KilitliKapi : MonoBehaviour
 {
-    // Singleton yapýsý: CollectableItem scriptinin bu kapýyý bulmasýný saðlar
+    // Singleton yapï¿½sï¿½: CollectableItem scriptinin bu kapï¿½yï¿½ bulmasï¿½nï¿½ saï¿½lar
     public static KilitliKapi instance;
 
-    [Header("Kilit Ayarlarý")]
-    public int gerekenObjeSayisi = 4; // Toplanmasý gereken anahtar/nesne sayýsý
-    public int suanToplanan = 0;     // Þu ana kadar toplanan (Otomatik artacak)
+    [Header("Kilit Ayarlarï¿½")]
+    public int gerekenObjeSayisi = 3; // Toplanmasï¿½ gereken anahtar/nesne sayï¿½sï¿½
+    public int suanToplanan = 0;     // ï¿½u ana kadar toplanan (Otomatik artacak)
     private bool kilitAcildi = false;
 
-    [Header("Hareket Ayarlarý")]
-    public float acilmaAcisi = 90f; // Kapýnýn kaç derece döneceði
-    [Tooltip("Düþük deðer = Yavaþ açýlma. Örn: 0.5 çok aðýrdýr, 5 çok hýzlýdýr.")]
-    public float acilmaHizi = 0.8f; // <-- YAVAÞ AÇILMASI ÝÇÝN DÜÞÜRÜLDÜ (Eskisi 4'tü)
+    [Header("Hareket Ayarlarï¿½")]
+    public float acilmaAcisi = 90f; // Kapï¿½nï¿½n kaï¿½ derece dï¿½neceï¿½i
+    [Tooltip("Dï¿½ï¿½ï¿½k deï¿½er = Yavaï¿½ aï¿½ï¿½lma. ï¿½rn: 0.5 ï¿½ok aï¿½ï¿½rdï¿½r, 5 ï¿½ok hï¿½zlï¿½dï¿½r.")]
+    public float acilmaHizi = 0.8f; // <-- YAVAï¿½ Aï¿½ILMASI ï¿½ï¿½ï¿½N Dï¿½ï¿½ï¿½Rï¿½LDï¿½ (Eskisi 4'tï¿½)
 
     [Header("Sesler")]
-    public AudioClip kilitliZorlamaSesi; // Kapý kilitliyken çalacak ses
-    public AudioClip acilmaSesi;         // Açýlma sesi
+    public AudioClip kilitliZorlamaSesi; // Kapï¿½ kilitliyken ï¿½alacak ses
+    public AudioClip acilmaSesi;         // Aï¿½ï¿½lma sesi
     public AudioClip kapanmaSesi;        // Kapanma sesi
 
-    // Durum deðiþkenleri
+    // Durum deï¿½iï¿½kenleri
     private bool kapiAcikMi = false;
     private Quaternion kapaliRotasyon;
     private Quaternion acikRotasyon;
@@ -29,7 +29,7 @@ public class KilitliKapi : MonoBehaviour
 
     void Awake()
     {
-        // Sahnede bu scriptten sadece bir tane olduðunu varsayýyoruz
+        // Sahnede bu scriptten sadece bir tane olduï¿½unu varsayï¿½yoruz
         if (instance == null)
             instance = this;
     }
@@ -38,40 +38,40 @@ public class KilitliKapi : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
 
-        // Baþlangýç rotasyonunu kaydet
+        // Baï¿½langï¿½ï¿½ rotasyonunu kaydet
         kapaliRotasyon = transform.localRotation;
 
-        // Açýk pozisyonu hesapla (Sadece Y ekseninde döndürür)
+        // Aï¿½ï¿½k pozisyonu hesapla (Sadece Y ekseninde dï¿½ndï¿½rï¿½r)
         acikRotasyon = Quaternion.Euler(kapaliRotasyon.eulerAngles.x, kapaliRotasyon.eulerAngles.y + acilmaAcisi, kapaliRotasyon.eulerAngles.z);
     }
 
     void Update()
     {
-        // Kapý kilidi açýldýysa hareketi yönet
+        // Kapï¿½ kilidi aï¿½ï¿½ldï¿½ysa hareketi yï¿½net
         if (kilitAcildi)
         {
             Quaternion hedef = kapiAcikMi ? acikRotasyon : kapaliRotasyon;
 
-            // Slerp fonksiyonu pürüzsüz ve yavaþ geçiþ saðlar
-            // Time.deltaTime * acilmaHizi formülü hýzý belirler
+            // Slerp fonksiyonu pï¿½rï¿½zsï¿½z ve yavaï¿½ geï¿½iï¿½ saï¿½lar
+            // Time.deltaTime * acilmaHizi formï¿½lï¿½ hï¿½zï¿½ belirler
             transform.localRotation = Quaternion.Slerp(transform.localRotation, hedef, Time.deltaTime * acilmaHizi);
         }
     }
 
-    // Karakterin (Player) Raycast ile çaðýrdýðý fonksiyon
+    // Karakterin (Player) Raycast ile ï¿½aï¿½ï¿½rdï¿½ï¿½ï¿½ fonksiyon
     public void KapiyiDene()
     {
         if (!kilitAcildi)
         {
-            // Eðer objeler henüz tamamlanmadýysa
-            Debug.Log($"Kapý Kilitli! Eksik parçalar var. ({suanToplanan}/{gerekenObjeSayisi})");
+            // Eï¿½er objeler henï¿½z tamamlanmadï¿½ysa
+            Debug.Log($"Kapï¿½ Kilitli! Eksik parï¿½alar var. ({suanToplanan}/{gerekenObjeSayisi})");
 
-            // Zorlama sesi çal
+            // Zorlama sesi ï¿½al
             if (kilitliZorlamaSesi != null) audioSource.PlayOneShot(kilitliZorlamaSesi);
         }
         else
         {
-            // Kilit açýksa kapý durumunu deðiþtir (Aç/Kapat)
+            // Kilit aï¿½ï¿½ksa kapï¿½ durumunu deï¿½iï¿½tir (Aï¿½/Kapat)
             kapiAcikMi = !kapiAcikMi;
 
             if (kapiAcikMi)
@@ -85,17 +85,21 @@ public class KilitliKapi : MonoBehaviour
         }
     }
 
-    // Toplanabilir eþyalarýn (CollectableItem) çaðýrdýðý fonksiyon
+    // Toplanabilir eï¿½yalarï¿½n (CollectableItem) ï¿½aï¿½ï¿½rdï¿½ï¿½ï¿½ fonksiyon
     public void ObjeToplandi()
     {
         suanToplanan++;
-        Debug.Log("Kilit Parçasý Toplandý: " + suanToplanan + "/" + gerekenObjeSayisi);
+        Debug.Log("Kilit ParÃ§asÄ± ToplandÄ±: " + suanToplanan + "/" + gerekenObjeSayisi);
 
-        if (suanToplanan >= gerekenObjeSayisi)
+        if (!kilitAcildi && suanToplanan >= gerekenObjeSayisi)
         {
             kilitAcildi = true;
-            Debug.Log("TÜM PARÇALAR TAMAM! Kapý kilidi açýldý.");
-            // Ýstersen buraya bir "Kilit açýlma sesi" (Unlock sound) ekleyebilirsin.
+            Debug.Log("TÃœM PARÃ‡ALAR TAMAM! KapÄ± kilidi aÃ§Ä±ldÄ±.");
+
+            // ARTIK OTOMATÄ°K AÃ‡MA YOK.
+            // Ä°stersen burada sadece bir "kilit aÃ§Ä±ldÄ±" sesi Ã§alabilirsin
+            // (acilmaSesi deÄŸil, ayrÄ± bir unlock sesi daha iyi olur).
+            // Ã¶rn: if (unlockSesi != null) audioSource.PlayOneShot(unlockSesi);
         }
     }
 }
