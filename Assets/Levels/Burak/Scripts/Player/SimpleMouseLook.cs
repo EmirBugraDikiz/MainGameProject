@@ -6,18 +6,20 @@ public class ProfessionalMouseLook : MonoBehaviour
     [Tooltip("Karakterin kendisi (Sağa/Sola dönüş için)")]
     public Transform playerBody;
 
+    [Tooltip("Varsa otomatik bulunur. controlsEnabled=false iken mouse look tamamen durur.")]
+    public PlayerAbilitiesController abilities;
+
     [Header("Sensitivity Settings")]
     [Range(0.1f, 10f)]
-    public float sensitivityX = 2.0f; // Yatay hassasiyet
+    public float sensitivityX = 2.0f;
     [Range(0.1f, 10f)]
-    public float sensitivityY = 2.0f; // Dikey hassasiyet
-    
+    public float sensitivityY = 2.0f;
+
     [Header("Restrictions")]
-    public float topClamp = -90f; // Yukarı bakma sınırı
-    public float bottomClamp = 90f; // Aşağı bakma sınırı
+    public float topClamp = -90f;
+    public float bottomClamp = 90f;
 
     [Header("Feel")]
-    [Tooltip("Mouse hareketini yumuşatır. Rekabetçi oyunlar için false, sinematik his için true yapın.")]
     public bool useSmoothing = false;
     [Range(1f, 50f)]
     public float smoothTime = 25f;
@@ -25,53 +27,80 @@ public class ProfessionalMouseLook : MonoBehaviour
     // İç değişkenler
     private float xRotation = 0f;
     private float mouseX, mouseY;
-    private Quaternion targetRotationBody;
-    private Quaternion targetRotationCam;
+
+    // ✅ Level başındaki "temiz" kamera ve body rotları
+    private Quaternion _startCamLocalRot;
+    private Quaternion _startBodyRot;
+
+    // ✅ controlsEnabled false->true dönüşünde reset basmak için
+    private bool _wasFrozenLastFrame = false;
 
     void Start()
     {
-        // Fareyi kilitle ve gizle
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        // Kamerayı ve rotasyonu mutlak sıfırdan başlat (Karşıya bakması için)
-        xRotation = 0f;
-        transform.localRotation = Quaternion.identity; // Kamerayı düzelt
-        
-        if (playerBody != null)
+        // Abilities auto-find
+        if (abilities == null)
         {
-            targetRotationBody = playerBody.rotation;
+            if (playerBody != null)
+                abilities = playerBody.GetComponent<PlayerAbilitiesController>();
+
+            if (abilities == null)
+                abilities = GetComponentInParent<PlayerAbilitiesController>();
         }
-        targetRotationCam = transform.localRotation;
+
+        // Başlangıç rotlarını kaydet
+        _startCamLocalRot = transform.localRotation;
+        _startBodyRot = playerBody != null ? playerBody.rotation : Quaternion.identity;
+
+        // Kamerayı düz başlat
+        xRotation = 0f;
+        mouseX = 0f;
+        mouseY = 0f;
     }
 
     void Update()
     {
+        // ✅ Jumpscare / death sırasında mouse look tamamen dursun
+        if (abilities != null && !abilities.controlsEnabled)
+        {
+            mouseX = 0f;
+            mouseY = 0f;
+            _wasFrozenLastFrame = true;
+            return;
+        }
+
+        // ✅ Tekrar açıldıysa (respawn sonrası) kamerayı level başındaki hale geri al
+        if (_wasFrozenLastFrame)
+        {
+            ResetLookToLevelStart();
+            _wasFrozenLastFrame = false;
+        }
+
         HandleInput();
     }
 
     void LateUpdate()
     {
+        if (abilities != null && !abilities.controlsEnabled)
+            return;
+
         ApplyRotation();
     }
 
     void HandleInput()
     {
-        // DeltaTime ile ÇARPMAYIN. Mouse input zaten bir "mesafe" verisidir.
-        // Ham veri (Raw) her zaman daha keskindir.
         float rawMouseX = Input.GetAxisRaw("Mouse X") * sensitivityX;
         float rawMouseY = Input.GetAxisRaw("Mouse Y") * sensitivityY;
 
-        // Yumuşatma ayarı
         if (useSmoothing)
         {
-            // Yumuşak geçiş (Lerp benzeri ama daha frame-safe)
             mouseX = Mathf.Lerp(mouseX, rawMouseX, smoothTime * Time.deltaTime);
             mouseY = Mathf.Lerp(mouseY, rawMouseY, smoothTime * Time.deltaTime);
         }
         else
         {
-            // Direkt ham veri (CS:GO / Valorant tarzı keskinlik)
             mouseX = rawMouseX;
             mouseY = rawMouseY;
         }
@@ -79,18 +108,27 @@ public class ProfessionalMouseLook : MonoBehaviour
 
     void ApplyRotation()
     {
-        // 1. Dikey Hesaplama (Yukarı/Aşağı - Pitch)
+        // Pitch
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, topClamp, bottomClamp);
 
-        // Kamerayı çevir (Sadece X ekseni)
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
-        // 2. Yatay Hesaplama (Sağa/Sola - Yaw)
+        // Yaw
         if (playerBody != null)
-        {
-            // Karakterin gövdesini Y ekseninde çevir
             playerBody.Rotate(Vector3.up * mouseX);
-        }
+    }
+
+    // ✅ Respawn sonrası kamera sapıtmasın diye "level start" rotuna reset
+    public void ResetLookToLevelStart()
+    {
+        mouseX = 0f;
+        mouseY = 0f;
+        xRotation = 0f;
+
+        transform.localRotation = _startCamLocalRot;
+
+        if (playerBody != null)
+            playerBody.rotation = _startBodyRot;
     }
 }
